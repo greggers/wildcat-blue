@@ -1,0 +1,19 @@
+.loader {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+	z-index: 9999;
+	background: url('images/loadax.gif') 50% 50% no-repeat rgb(249,249,249);
+}
+
+img#floater {
+    position: fixed; /* forces the element to stay fixed in relation to the viewport */
+    top: 50%; /* sets the top of the image 50% of the page height */
+    left: 50%; /* sets the left side of the image 50% across the page */
+    margin-left: -100px; /* moves the image half of its own width to the left-side of the page */
+    margin-top: -93px; /* moves the image half its height 'up' the page */
+    box-shadow: 0.5em 0.5em 0.7em #333; /* to give the illusion of 'floating'
+    border-radius: 1em;
+}

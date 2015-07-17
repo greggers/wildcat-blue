@@ -1,0 +1,1 @@
+$.backstretch("/img/canyon_scaled.jpg");
