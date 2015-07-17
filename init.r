@@ -23,3 +23,15 @@ if(!suppressWarnings(require(car))) {
   library(car)
   
 }
+
+if(!suppressWarnings(require(shiny))) {
+  
+  install.packages("shiny")
+  
+  library(shiny)
+  
+} else {
+  
+  library(shiny)
+  
+}
