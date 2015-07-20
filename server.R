@@ -1,32 +1,6 @@
 library(shiny)
-
-generateValuation <- function(session)
-{
-  return(paste(titlePanel("Uploading Files"),
-         sidebarLayout(
-           sidebarPanel(
-             fileInput('file1', 'Choose CSV File',
-                       accept=c('text/csv', 
-                                'text/comma-separated-values,text/plain', 
-                                '.csv')),
-             tags$hr(),
-             checkboxInput('header', 'Header', TRUE),
-             radioButtons('sep', 'Separator',
-                          c(Comma=',',
-                            Semicolon=';',
-                            Tab='\t'),
-                          ','),
-             radioButtons('quote', 'Quote',
-                          c(None='',
-                            'Double Quote'='"',
-                            'Single Quote'="'"),
-                          '"')
-           ),
-           mainPanel(
-             tableOutput('fileContent')
-           )
-         )))
-}
+library(MCMCpack)
+source('valuation.R')
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
@@ -53,22 +27,92 @@ shinyServer(function(input, output, session) {
     }
     
   })
+
+  
+  output$simParams <- 
+    renderText({
+     
+    
+    
+      # input$file1 will be NULL initially. After the user selects
+      # and uploads a file, it will be a data frame with 'name',
+      # 'size', 'type', and 'datapath' columns. The 'datapath'
+      # column will contain the local filenames where the data can
+      # be found.
+      
+      inFile <- input$file1
+      
+      if (is.null(inFile))
+        return("")
+      
+      val.data <- processFiles(inFile,input)
+      assign('mainData',val.data,envir=.GlobalEnv)      
+      headerSelVec <- c(colnames(val.data))
+      paste(
+        h4("Simulation Parameters"),
+        selectInput('depVar',
+                    'Dependent Variable',
+                    headerSelVec
+                  ),
+        selectInput('indVar',
+                    'Independent Variable',
+                    headerSelVec,
+                    multiple=TRUE
+        ),
+        actionButton("getSimParms","Submit")
+      )
+  })
+  
+  selDepVar <- eventReactive(input$getSimParms, {
+    input$depVar
+  })
+  
+  selIndVar <- eventReactive(input$getSimParms, {
+    input$indVar
+  })
   
   output$fileContent <- renderTable({
-    
-    # input$file1 will be NULL initially. After the user selects
-    # and uploads a file, it will be a data frame with 'name',
-    # 'size', 'type', and 'datapath' columns. The 'datapath'
-    # column will contain the local filenames where the data can
-    # be found.
     
     inFile <- input$file1
     
     if (is.null(inFile))
       return(NULL)
-    
-    read.csv(inFile$datapath, header=input$header, sep=input$sep, 
-             quote=input$quote)
+  
+    mainData
   })
+
+  
+  output$summary <- renderText({
+      indVars <- selIndVar()
+      depVar <- selDepVar()
+      regressForm <- {paste(depVar," ~ ",paste(indVars,collapse='+'))}
+      val.mcmc <- MCMCregress(regressForm, data=mainData, seed=112005)
+      summary(val.mcmc)
+      
+      
+#     inFile <- input$file1
+#     
+#     if (is.null(inFile))
+#       return(NULL)
+#     
+#     indVar <- input$indVar
+#     depVars <- input$depVar
+#     
+#     summary(mainData)
+  })
+  
+  output$sumTabContent <-renderText({
+      inFile <- input$file1
+      if (is.null(inFile))
+        return(NULL)
+      summaryOut <- htmlOutput('summary');
+      tableOut <- tableOutput('fileContent')
+      paste(tabsetPanel(
+        type = "tabs",
+        tabPanel("Summary",verbatimTextOutput('summary')),
+        tabPanel("Table",tableOutput('fileContent')) 
+      ))
+      
+    })
   
 })
