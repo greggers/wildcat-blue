@@ -81,38 +81,20 @@ shinyServer(function(input, output, session) {
     mainData
   })
 
+  output$summaryContent <- renderText({
+    inFile <- input$file1
+    
+    if(is.null(inFile))
+      return("")
+    paste(h3('Simuation Summary'),verbatimTextOutput('summary'))
+  })
   
-  output$summary <- renderText({
+  output$summary <- renderPrint({
       indVars <- selIndVar()
       depVar <- selDepVar()
       regressForm <- {paste(depVar," ~ ",paste(indVars,collapse='+'))}
-      val.mcmc <- MCMCregress(regressForm, data=mainData, seed=112005)
+      val.mcmc <- MCMCregress(regressForm, data=data.frame(mainData), seed=112005)
       summary(val.mcmc)
-      
-      
-#     inFile <- input$file1
-#     
-#     if (is.null(inFile))
-#       return(NULL)
-#     
-#     indVar <- input$indVar
-#     depVars <- input$depVar
-#     
-#     summary(mainData)
   })
-  
-  output$sumTabContent <-renderText({
-      inFile <- input$file1
-      if (is.null(inFile))
-        return(NULL)
-      summaryOut <- htmlOutput('summary');
-      tableOut <- tableOutput('fileContent')
-      paste(tabsetPanel(
-        type = "tabs",
-        tabPanel("Summary",verbatimTextOutput('summary')),
-        tabPanel("Table",tableOutput('fileContent')) 
-      ))
-      
-    })
   
 })

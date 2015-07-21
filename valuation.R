@@ -35,7 +35,7 @@ generateValuation <- function(session)
           
         ),
         hr(),
-        htmlOutput('sumTabContent')
+        htmlOutput('summaryContent')
         
       )  
     )
@@ -47,6 +47,7 @@ processFiles <- function(inFile,input)
   
   if(ext == "csv")
   {
+    
     val.data <- read.csv(inFile$datapath, stringsAsFactors=FALSE, header=input$header, sep=input$sep, 
                               quote=input$quote)
   }
@@ -54,16 +55,35 @@ processFiles <- function(inFile,input)
   {
     val.data <- read.xls(inFile$datapath)
   }
-  headerSelVec <- c(colnames(val.data))
-  for(i in 1:length(val.data))
+  for(i in val.data)
   {
-    if((sapply(val.data[1,i],class) == 'factor') 
-    && (substring(val.data[1,i],1,1)=='$'))
-    {
-      vecName <- {paste('val.data$',headerSelVec[i],sep='')}
-      vecName <- as.numeric(gsub('[$,]', '', vecName))
-    }
+    if((sapply(i,class) == 'character') 
+     && (substring(i,1,1)=='$'))
+     {
+       i <- as.numeric(gsub('[$,]', '', i))
+     }
   }
+  val.data <- sapply(val.data, clean)
+#   headerSelVec <- c(colnames(val.data))
+#   for(i in 1:length(val.data))
+#   {
+#     if((sapply(val.data[1,i],class) == 'factor') 
+#     && (substring(val.data[1,i],1,1)=='$'))
+#     {
+#       vecName <- {paste('val.data$',headerSelVec[i],sep='')}
+#       vecName <- as.numeric(gsub('[$,]', '', vecName))
+#     }
+#   }
   
   return(val.data)
+}
+
+clean <- function(i)
+{
+  if((sapply(i,class) == 'character') 
+     && (substring(i,1,1)=='$'))
+  {
+    i <- as.numeric(gsub('[$,]', '', i))
+  }
+  return(i)
 }
