@@ -42,7 +42,7 @@ generateValuation <- function(session)
 
 processFiles <- function(inFile,input)
 {
-  ext <- file_ext(inFile$name)
+  ext <- tolower(file_ext(inFile$name))
   
   if(ext == "csv")
   {
