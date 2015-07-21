@@ -1,6 +1,5 @@
 library(tools)
 library(gdata)
-library(rJava)
 
 generateValuation <- function(session)
 {
